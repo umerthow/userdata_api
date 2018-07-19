@@ -1,0 +1,5 @@
+{
+    "timestamps": true,
+    "paranoid": true,
+    "underscored": true
+}

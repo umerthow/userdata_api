@@ -1,6 +1,5 @@
 app:
   port: 6000
-
 api:
   version: "1.0"
 
@@ -26,9 +25,9 @@ db:
   host: 127.0.0.1
   port: 3306
   dialect: mysql
-  name: video-superset
-  user: root
-  password: 
+  name: video
+  user: umar  
+  password: umarsstv
 
 cache:
   ttl: 30

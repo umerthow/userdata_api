@@ -2,12 +2,19 @@ const conf = require('config');
 const Sequelize = require('sequelize');
 
 const db = conf.db;
-const dbSeq = new Sequelize(db.name, db.user, db.password, db);
+export const dbSeq_video = new Sequelize('video', db.user, db.password, db);
+export const dbSeq_user = new Sequelize('userdata', db.user, db.password, db);
 
-dbSeq.authenticate().then(() => {
-  console.log('Connection has been established successfully.');
+dbSeq_video.authenticate().then(() => {
+  console.log('Connection to DBvideo has been established successfully.');
 }).catch(err => {
   console.error('Unable to connect to the database: ', err);
 });
 
-module.exports = dbSeq
+dbSeq_user.authenticate().then(() => {
+  console.log('Connection to DBuserdata has been established successfully.');
+}).catch(err => {
+  console.error('Unable to connect to the database: ', err);
+});
+
+

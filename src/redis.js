@@ -3,15 +3,15 @@ const config = require('config');
 
 class Redis {
 	constructor(port, host) {
-		this.client = redis.createClient(port, host, {prefix: config.redis.prefix+':' });
+		this.client = redis.createClient(port, host, { prefix: config.redis.prefix + ':' });
 		this.client.on("error", function (err) {
-				console.log("Error " + err);
+			console.log("Error " + err);
 		});
 	}
-	
+
 	// basic set, get, del
 	setRedis(key, value, ttl) {
-		if(ttl != null) {
+		if (ttl != null) {
 			this.client.set(key, JSON.stringify(value), 'EX', ttl);
 		} else {
 			this.client.set(key, JSON.stringify(value));
@@ -28,7 +28,7 @@ class Redis {
 				try {
 					let result = JSON.parse(reply);
 					return resolve(result);
-				} catch(err) {
+				} catch (err) {
 					return resolve(null);
 				}
 			})
@@ -37,8 +37,8 @@ class Redis {
 
 	delRedis(key) {
 		this.client.del(key);
-	}  
-	
+	}
+
 	/* VIDEO */
 	// video by ID
 	setVideoById(videoId, value, ttl, projectId) {
@@ -53,7 +53,7 @@ class Redis {
 
 	delVideoById(videoId, projectId) {
 		let redisKey = projectId + ':video:id:' + videoId;
-		this.delRedis(redisKey); 
+		this.delRedis(redisKey);
 	}
 
 	// video IDs by playlist ID
@@ -69,9 +69,9 @@ class Redis {
 
 	delVideoIdsByPlaylistId(videoId, projectId) {
 		let redisKey = projectId + ':video_ids:playlist_id:' + videoId;
-		this.delRedis(redisKey); 
+		this.delRedis(redisKey);
 	}
-	
+
 	// video by date and content type
 	setVideoByDateAndContentType(date, contentType, value, ttl, projectId) {
 		let redisKey = projectId + ':video:date:' + date + ':content_type:' + contentType;
@@ -102,7 +102,7 @@ class Redis {
 
 	delVideoQualities(projectId) {
 		let redisKey = projectId + ':video_quality:all';
-		this.delRedis(redisKey); 
+		this.delRedis(redisKey);
 	}
 
 	// by ID
@@ -110,7 +110,7 @@ class Redis {
 		let redisKey = projectId + ':video_quality:id:' + videoQualityId;
 		this.setRedis(redisKey, value, ttl);
 	}
-	
+
 	getVideoQualityById(videoQualityId, projectId) {
 		let redisKey = projectId + ':video_quality:id:' + videoQualityId;
 		return this.getRedis(redisKey);
@@ -118,9 +118,9 @@ class Redis {
 
 	delVideoQualityById(videoQualityId, projectId) {
 		let redisKey = projectId + ':video_quality:id:' + videoQualityId;
-		this.delRedis(redisKey); 
+		this.delRedis(redisKey);
 	}
-	
+
 	/* PLAYLIST */
 	// all playlists
 	setAllPlaylistIds(value, ttl, projectId) {
@@ -135,8 +135,45 @@ class Redis {
 
 	delAllPlaylistIds(projectId) {
 		let redisKey = projectId + ':playlist:all';
-		this.delRedis(redisKey); 
+		this.delRedis(redisKey);
 	}
+
+	/* USER VIDEO HISTORY S */
+
+	getUserVidHistory(projectId, userID) {
+		let redisKey = projectId + ':vidhistory:id:' + userID;
+		return this.getRedis(redisKey);
+	}
+
+	setUserVidHistory(userID, value, ttl, projectId) {
+		let redisKey = projectId + ':vidhistory:id:' + userID;
+		this.setRedis(redisKey, value, ttl);
+	}
+
+	delUserVidHistory(value, ttl, projectId, userID) {
+		let redisKey = projectId + ':vidhistory:id:' + userID;
+		this.delRedis(redisKey);
+	}
+
+	/* USER VIDEO HISTORY E */
+
+
+	// Preference by ID
+	setPreferenceById(preferenceId, value, ttl, projectId) {
+		let redisKey = projectId + ':preference:id:' + preferenceId;
+		this.setRedis(redisKey, value, ttl);
+	}
+
+	getPreferenceById(preferenceId, projectId) {
+		let redisKey = projectId + ':preference:id:' + preferenceId;
+		return this.getRedis(redisKey);
+	}
+
+	delPreferenceById(preferenceId, projectId) {
+		let redisKey = projectId + ':preference:id:' + preferenceId;
+		this.delRedis(redisKey);
+	}
+
 
 	// playlist by ID
 	setPlaylistById(playlistId, value, ttl, projectId) {
@@ -151,7 +188,7 @@ class Redis {
 
 	delPlaylistById(playlistId, projectId) {
 		let redisKey = projectId + ':playlist:id:' + playlistId;
-		this.delRedis(redisKey); 
+		this.delRedis(redisKey);
 	}
 
 	// playlist IDs by video ID
@@ -167,9 +204,9 @@ class Redis {
 
 	delPlaylistIdsByVideoId(videoId, projectId) {
 		let redisKey = projectId + ':playlist_ids:video_id:' + videoId;
-		this.delRedis(redisKey); 
+		this.delRedis(redisKey);
 	}
-	
+
 	// playlist IDs by content type
 	setPlaylistIdsByContentType(contentType, value, ttl, projectId) {
 		let redisKey = projectId + ':playlist_ids:content_type:' + contentType;
@@ -199,7 +236,7 @@ class Redis {
 
 	delSubplaylistIds(playlistId, projectId) {
 		let redisKey = projectId + ':subplaylist:id:' + playlistId;
-		this.delRedis(redisKey); 
+		this.delRedis(redisKey);
 	}
 
 	/* TEAM */
@@ -216,7 +253,7 @@ class Redis {
 
 	delTeamById(teamId, projectId) {
 		let redisKey = projectId + ':team:id:' + teamId;
-		this.delRedis(redisKey); 
+		this.delRedis(redisKey);
 	}
 
 	/* RELATED ARTICLE */
@@ -232,7 +269,7 @@ class Redis {
 
 	delRelatedArticleIds(videoId, projectId) {
 		let redisKey = projectId + ':related_article:id:' + videoId;
-		this.delRedis(redisKey); 
+		this.delRedis(redisKey);
 	}
 
 	/* CONTENT TYPE */
@@ -248,9 +285,9 @@ class Redis {
 
 	delContentTypeById(typeId, projectId) {
 		let redisKey = projectId + ':content_type:id:' + typeId;
-		this.delRedis(redisKey); 
-	}  
-	
+		this.delRedis(redisKey);
+	}
+
 	/* SCHEDULE */
 	setScheduleById(scheduleId, value, ttl, projectId) {
 		let redisKey = projectId + ':schedule:id:' + scheduleId;
@@ -264,7 +301,7 @@ class Redis {
 
 	delScheduleById(scheduleId, projectId) {
 		let redisKey = projectId + ':schedule:id:' + scheduleId;
-		this.delRedis(redisKey); 
+		this.delRedis(redisKey);
 	}
 
 	setScheduleIdsByDateAndPlaylistId(date, playlistId, value, ttl, projectId) {
@@ -281,7 +318,7 @@ class Redis {
 		let redisKey = projectId + ':schedule_ids:date:' + date + ':playlist_id:' + playlistId;
 		this.delRedis(redisKey);
 	}
-	
+
 	/* SUBSCRIPTION TOGGLE */
 	// control whether to check user subscription (value = 1) or allow access to all videos (value = 0)
 	setSubscriptionToggle(value, projectId) {

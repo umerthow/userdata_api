@@ -16,6 +16,9 @@ import cors from "cors";
 import gracefulExit from "express-graceful-exit";
 
 import util from "./util";
+
+const HandlerHistory = require('./History/handler.js');
+const HandlerPreference = require('./Preference/handler.js')
 // const HandlerVideo = require('./Video/handler.js');
 // const HandlerPlaylist = require('./Playlist/handler.js');
 // const HandlerAd = require('./Ad/handler.js');
@@ -62,7 +65,7 @@ const getHostmaps = async app => {
     });
 };
 
-Raven.context(async function() {
+Raven.context(async function () {
   const authPassport = new AuthPassport({
     api: "videos",
     store: {
@@ -76,7 +79,7 @@ Raven.context(async function() {
   const port = config.app.port || 4000;
 
   // Initialize hostmaps
-  // getHostmaps(app);
+  getHostmaps(app);
 
   app.disable("x-powered-by");
 
@@ -105,7 +108,7 @@ Raven.context(async function() {
   app.use(
     morgan(
       `${
-        process.env.WORKER_ID
+      process.env.WORKER_ID
       } :remote-addr - :remote-user [:date[clf]] ":method :url HTTP/:http-version" :status :res[content-length] ":referrer" ":user-agent"`
     )
   );
@@ -123,58 +126,19 @@ Raven.context(async function() {
   app.use(cors());
 
   // Enable heimdall middleware
-  // app.use(Heimdall(app));
+  app.use(Heimdall(app));
 
   // Route for refreshing superset hostname maps
-  router.get("/ping", async function(req, res, next) {
+  router.get("/ping", async function (req, res, next) {
     res.send("PONG");
   });
 
   // Route for refreshing superset hostname maps
-  router.get("/update", async function(req, res, next) {
+  router.get("/update", async function (req, res, next) {
     // await getHostmaps(app);
     res.json({ "Hostnames updated!": app.locals.hosts });
   });
 
-  router.get("/get", async (req, res, next) => {
-    let { project, uid } = req.query;
-
-    // Runs the query
-    bigquery
-      .query({
-        query:
-          "SELECT * FROM sstv_bucket.userdata_video_histories WHERE project_id = ? AND uid = ?",
-        useLegacySql: false,
-        params: [project, uid]
-      })
-      .then(async results => {
-        let rows = results[0];
-        // debugger;
-        rows = await rows.map(row => {
-          for (const key in row) {
-            if (row.hasOwnProperty(key)) {
-              // const element = row[key];
-              if (key.includes("_at") && row[key] != null) {
-                const newValue = row[key].value;
-                // debugger;
-                delete row[key];
-                row[key] = newValue;
-              }
-            }
-          }
-        });
-        Promise.all(rows).then(result => {
-          console.log(result);
-          result = _.sortBy(rows, [item => item.updated_at]);
-          // rows = _.uniqBy(rows, "video_id");
-          res.json(result);
-        });
-      })
-      .catch(err => {
-        console.error("ERROR:", err);
-        res.status(400).json(err);
-      });
-  });
 
   // Stream insert bigquery
   router.get("/stream", async (req, res, next) => {
@@ -184,18 +148,10 @@ Raven.context(async function() {
       {
         uid: "kareemlukitomo123",
         project_id: "supersoccertv",
-        video_id: "VOD",
+        video_id: "0361231622",
         created_at: moment().format("YYYY-MM-DD HH:mm:SS"),
-        updated_at: moment().format("YYYY-MM-DD HH:mm:SS")
-      },
-      {
-        uid: "kareemlukitomo123",
-        project_id: "supersoccertv",
-        video_id: "sstv",
-        created_at: moment().format("YYYY-MM-DD HH:mm:SS"),
-        updated_at: moment()
-          .add(1, "hour")
-          .format("YYYY-MM-DD HH:mm:SS")
+        updated_at: moment().format("YYYY-MM-DD HH:mm:SS"),
+        time_position: 670
       }
     ];
 
@@ -222,7 +178,16 @@ Raven.context(async function() {
       });
   });
 
-  router.get("/", function(req, res, next) {
+  //route video history
+  router.get('/userdata/:id/video/history', authPassport.validate({ scope: scopes.historyRead, credentialsRequired: false }), HandlerHistory.getHistoryByID);
+
+
+  //route preference
+  router.get('/userdata/:id/preference', authPassport.validate({ scope: scopes.preferenceRead, credentialsRequired: false }), HandlerPreference.getPreferenceByID);
+
+
+
+  router.get("/", function (req, res, next) {
     res.end();
   });
 

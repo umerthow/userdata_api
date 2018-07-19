@@ -1,5 +1,7 @@
 const Sequelize = require('sequelize');
-const DBModel = require('./model.js');
+//const DBModel = require('./model.js');
+import { DBModel } from './model.js'
+
 const moment = require('moment');
 
 //modify update key with db column name
@@ -232,32 +234,32 @@ Query.updateVideo = (vid, projectId) => {
     match_end: matchEnd,
     expire_at: expireAt,
   }, {
-    where: {
-      id: vid.id,
-      project_id: projectId
-    }
-  });
+      where: {
+        id: vid.id,
+        project_id: projectId
+      }
+    });
 }
 
 Query.patchVideo = (videoID, vid, projectId) => {
   //create update json based on patch body
   let queryData = {};
-  
+
   let attributes = vid.attributes || {};
   let relationships = vid.relationships || {};
 
-  for(let key in attributes) {
+  for (let key in attributes) {
     let val = attributes[key];
     if (key == 'matchStart' || key == 'matchEnd' || key == 'expireAt') {
       val = moment(val, 'YYYYMMDD hh:mm:ss');
     }
     queryData[convertJSONKey(key)] = val;
   }
-  
-  for(let key in relationships) {
-    if(key == 'home') {
+
+  for (let key in relationships) {
+    if (key == 'home') {
       queryData['home_team_id'] = relationships.home.data.id;
-    } else if(key == 'away') {
+    } else if (key == 'away') {
       queryData['away_team_id'] = relationships.away.data.id;
     }
   }
@@ -281,11 +283,11 @@ Query.patchVideo = (videoID, vid, projectId) => {
     match_end: queryData.attributes.matchEnd,
     expire_at: queryData.attributes.expireAt
   }, {
-    where: {
-      id: videoID,
-      project_id: projectId
-    }
-  });
+      where: {
+        id: videoID,
+        project_id: projectId
+      }
+    });
 }
 
 Query.deleteVideo = (videoID, projectId) => {
@@ -293,12 +295,30 @@ Query.deleteVideo = (videoID, projectId) => {
     status: 0,
     deleted_at: Sequelize.literal('CURRENT_TIMESTAMP')
   }, {
+      where: {
+        id: videoID,
+        project_id: projectId
+      }
+    });
+};
+
+///////////////////////
+///// PREFERENCES ////
+////////////////////
+
+Query.getPreferenceByIDs = (id, projectId) => {
+  return DBModel.Preference.findAll({
     where: {
-      id: videoID,
-      project_id: projectId
-    }
+      id: id
+    },
+    attributes: [
+      'id',
+      'created_at'
+    ]
   });
 };
+
+
 
 ///////////////////////
 ////// PLAYLISTS /////
@@ -352,6 +372,8 @@ Query.getPlaylistsByIDs = (ids, projectId) => {
     ]
   });
 };
+
+
 
 Query.getPlaylistByID = (id, projectId) => {
   return DBModel.Playlists.findAll({
@@ -412,8 +434,8 @@ Query.getSubplaylists = (id, projectId) => {
   return DBModel.Playlists.findAll({
     where: {
       parent_id: {
-        $like: id+'%'
-      } ,
+        $like: id + '%'
+      },
       status: 1,
       project_id: projectId
     },
@@ -452,11 +474,11 @@ Query.updatePlaylist = (pl, projectId) => {
     sort_order: pl.attributes.sortOrder,
     parent_id: pl.attributes.parentID
   }, {
-    where: {
-      id: pl.id,
-      project_id: projectId
-    }
-  });
+      where: {
+        id: pl.id,
+        project_id: projectId
+      }
+    });
 }
 
 Query.patchPlaylist = (plID, pl, projectId) => {
@@ -477,12 +499,12 @@ Query.patchPlaylist = (plID, pl, projectId) => {
     icon_url: pl.attributes.iconURL,
     sort_order: pl.attributes.sortOrder,
     parent_id: pl.attributes.parentID
-  },{
-    where: {
-      id: plID,
-      project_id: projectId
-    }
-  });
+  }, {
+      where: {
+        id: plID,
+        project_id: projectId
+      }
+    });
 }
 
 Query.deletePlaylist = (playlistID, projectId) => {
@@ -490,11 +512,11 @@ Query.deletePlaylist = (playlistID, projectId) => {
     status: 0,
     deleted_at: Sequelize.literal('CURRENT_TIMESTAMP')
   }, {
-    where: {
-      id: playlistID,
-      project_id: projectId
-    }
-  });
+      where: {
+        id: playlistID,
+        project_id: projectId
+      }
+    });
 }
 
 ///////////////////////
@@ -526,7 +548,7 @@ Query.getVideosByPlaylistID = (playlistID, projectId) => {
 Query.insertPlaylistVideo = (playlistIDs, videoID, projectId) => {
   let bulkCreateData = [];
   for (let pl of playlistIDs) {
-    bulkCreateData.push({playlist_id: pl, video_id: videoID, status: 1, project_id: projectId});
+    bulkCreateData.push({ playlist_id: pl, video_id: videoID, status: 1, project_id: projectId });
   };
 
   return DBModel.PlaylistVideos.bulkCreate(bulkCreateData);
@@ -625,7 +647,7 @@ Query.getRelatedArticles = (videoID) => {
 Query.insertRelatedArticles = (articleIds, videoId) => {
   let bulkCreateData = [];
   for (let articleId of articleIds) {
-    bulkCreateData.push({video_id: videoId, article_id: articleId, status: 1});
+    bulkCreateData.push({ video_id: videoId, article_id: articleId, status: 1 });
   };
 
   return DBModel.RelatedArticles.bulkCreate(bulkCreateData);
