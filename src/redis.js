@@ -39,6 +39,9 @@ class Redis {
 		this.client.del(key);
 	}
 
+
+
+
 	/* VIDEO */
 	// video by ID
 	setVideoById(videoId, value, ttl, projectId) {

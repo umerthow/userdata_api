@@ -1,6 +1,6 @@
 const Sequelize = require('sequelize');
 //const DBModel = require('./model.js');
-import { DBModel } from './model.js'
+import { DBModel, DBUser } from './model.js'
 
 const moment = require('moment');
 
@@ -48,6 +48,9 @@ const convertJSONKey = (key) => {
 }
 
 const Query = {};
+
+
+
 
 ///////////////////////
 ////// VIDEOS ////////
@@ -307,17 +310,58 @@ Query.deleteVideo = (videoID, projectId) => {
 ////////////////////
 
 Query.getPreferenceByIDs = (id, projectId) => {
-  return DBModel.Preference.findAll({
+  return DBUser.Preferences.findAll({
     where: {
-      id: id
+      uid: id
     },
     attributes: [
       'id',
-      'created_at'
+      'uid',
+      'created_at',
+      'updated_at',
+      'langguage',
     ]
   });
 };
 
+
+Query.insertPreference = (pf, projectId) => {
+
+  //modify dates value
+  let createdAt = moment().format("YYYY-MM-DD HH:mm:SS");
+  return DBUser.Preferences.create({
+    uid: pf.uid,
+    langguage: pf.langguage,
+    created_at: createdAt,
+
+    // project_id: projectId
+  });
+};
+
+
+Query.UpdatePreference = (pf, projectId) => {
+  let updatedAt = moment().format("YYYY-MM-DD HH:mm:SS");
+  return DBUser.Preferences.update({
+    langguage: pf.langguage,
+    updated_at: updatedAt,
+  }, {
+      where: {
+        uid: pf.uid,
+        //        project_id: projectId
+      }
+    });
+}
+
+Query.deletePreference = (preferenceID, projectId) => {
+  return DBUser.Preferences.update({
+    status: 0,
+    deleted_at: Sequelize.literal('CURRENT_TIMESTAMP')
+  }, {
+      where: {
+        uid: preferenceID,
+      }
+    });
+}
 
 
 ///////////////////////

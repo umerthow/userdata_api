@@ -184,8 +184,9 @@ Raven.context(async function () {
 
   //route preference
   router.get('/userdata/:id/preference', authPassport.validate({ scope: scopes.preferenceRead, credentialsRequired: false }), HandlerPreference.getPreferenceByID);
-
-
+  router.post('/userdata/preference', authPassport.validate({ scope: scopes.preferenceInsert, credentialsRequired: false }), HandlerPreference.postNewPreference);
+  router.put('/userdata/preference', authPassport.validate({ scope: scopes.preferenceUpdate, credentialsRequired: false }), HandlerPreference.UpdatePreference);
+  router.delete('/userdata/:id/preference', authPassport.validate({ scope: scopes.preferenceDelete, credentialsRequired: false }), HandlerPreference.deletePreference);
 
   router.get("/", function (req, res, next) {
     res.end();
@@ -203,13 +204,7 @@ Raven.context(async function () {
       res.status(401).end();
     } else {
       console.error(err);
-      util.responseError(
-        res,
-        {
-          error_id: res.sentry
-        },
-        500
-      );
+      res.status(err.status).json(err);
     }
   });
 
