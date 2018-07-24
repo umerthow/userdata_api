@@ -19,6 +19,7 @@ import util from './util'
 
 const HandlerHistory = require('./History/handler.js')
 const HandlerPreference = require('./Preference/handler.js')
+const HandlerFavorites = require('./Favorites/handler.js')
 // const HandlerVideo = require('./Video/handler.js');
 // const HandlerPlaylist = require('./Playlist/handler.js');
 // const HandlerAd = require('./Ad/handler.js');
@@ -42,7 +43,7 @@ const bigquery = new BigQuery({
 	projectId,
 	credentials: {
 		private_key:
-      '-----BEGIN PRIVATE KEY-----\nMIIEvAIBADANBgkqhkiG9w0BAQEFAASCBKYwggSiAgEAAoIBAQCdei7nXCSItkGf\npk+j6gCxWSHNId+vxRwoSiEvd+Gb2xBLvBjQcv6bCswn9z1t9ENuZygEw8/GF1mv\nN/lL9qgfQcty6AevbB1mV2vOuIvxeuybVWq9cXw/pW3MrxfXIQiP39T5syHKL18v\nbKKyqlQWilmlemiC7dQdMPnrDqp4qevfmrMOSiVLuxC5jKGT8tN+ct2OF41Elcoi\nwdAYNj5fSa+RqNOY670z3V5nCrsvS8MPGAc40w6TB+BlJSC50nG8ybuhGjPajNfU\n7kFe6QsL/5mKahHHWssJt+A8gI7rsixM3szN3fr1LWVXOocf2UCdaE98ouie/MKp\nGYQpTpTVAgMBAAECggEASqRIyhnXKUO2DC2gzxFRvb4BMwFszJvxkjk8zIqWkbC+\nYx9nZZo0CxoNlZ3vbIgcVB6qDcQgXgTgWhh+Xh6uJo6hl7faOLBWqRUjwOqhTlbV\nAnV0sBGz8lj/l8agVrROIh/Wi3p4OCTHCawE3Am27K4r+q7wDasb4LA/rUYY0DL/\n44AMgEo+ZDG9dkQUv81HWCmrl2McJmpBggRaBsbbOZjqRbyZH4bPbDPC8MLp4j1V\nV94/5wCpmWTpWLD3Qyom7ge6CVZOhRZ23GDEWrJ6gJfviWeq758q2AAVRVRer9e0\nEDY0ztSDBa2x/5Ek32nHorXG1D6woSTUZ/TFE3uf6wKBgQDQlBwkFhhNdw6NBqLx\nui6vt/WDGPjVVSOs33QS/wTa2xLHlPOZIrrZAvqu14r3WKc581dgEExlIGY/V0ap\n75kuXXvSZcIRQR6nizv9+ZL1bRA6YgYw1JfAhWzSDBplfLyXixyneFWHGtDkLbF5\nCDN5TUMjtIZuw2tvVMFp9v2FLwKBgQDBR9PazmOnyg7jXufucYLHGHGpQEBK8xjt\nyY2/YVIbMTVHlnXrtkdyqhhlglsIaG+KO06prZNFI8aH+bRRqY5sM6QpqS4Qqcwr\n56VTqgtdNyzIr/waWILDpkKD7F797B+ImhEOFNEFgY6CtZ0cR3MFTacorLFSMKus\nEoIMuFqNOwKBgBoEj6oUs31eP4tp64N5tP8oVFDBGbEKyMN0sDb6ZrGiKCqLMwPE\nKEiPrZOHwYbvIRUCfMC357+plfeKvH7QK2x0LtDk7ptWYyuFG7unmSRSMXcG6TzI\nGBHk0tk0t0o3kBLbQHzHbuvGdY4xAPVXB4y3DYvzpd1FNS6TBPlh3OfzAoGAICep\n+DHz5Fs6RNtqLIIX5rWLW0QELjPpRs4MVfWD6mAyY/mFHrTRiCMCMgkQygJN5Cpf\nuNzWrl74TXDebeOOfTPOMNwjfMQy4m8EUznr8BMY0T5t65gkERac5EOzvfzFdj1j\nbvtJlufp5JcAT08XtJ8pmxu32F ueg98EYcdd0TcCgYAngjlNrSSKW9ZciQDCSbAC\n5xRyh5dg/HprJXPotm0cvquhdi3ABP8FH0nbEvSjDiTqGthP52XqRx029s2g8ApA\nSp/vruaqZu5otY9LY1GI138d78LAJgbBQNDGeQ/dVEXJOWqoy6ff5LhPWg5w2Cqp\ngbFwYoY2ZrD82uosnm1mng==\n-----END PRIVATE KEY-----\n',
+			'-----BEGIN PRIVATE KEY-----\nMIIEvAIBADANBgkqhkiG9w0BAQEFAASCBKYwggSiAgEAAoIBAQCdei7nXCSItkGf\npk+j6gCxWSHNId+vxRwoSiEvd+Gb2xBLvBjQcv6bCswn9z1t9ENuZygEw8/GF1mv\nN/lL9qgfQcty6AevbB1mV2vOuIvxeuybVWq9cXw/pW3MrxfXIQiP39T5syHKL18v\nbKKyqlQWilmlemiC7dQdMPnrDqp4qevfmrMOSiVLuxC5jKGT8tN+ct2OF41Elcoi\nwdAYNj5fSa+RqNOY670z3V5nCrsvS8MPGAc40w6TB+BlJSC50nG8ybuhGjPajNfU\n7kFe6QsL/5mKahHHWssJt+A8gI7rsixM3szN3fr1LWVXOocf2UCdaE98ouie/MKp\nGYQpTpTVAgMBAAECggEASqRIyhnXKUO2DC2gzxFRvb4BMwFszJvxkjk8zIqWkbC+\nYx9nZZo0CxoNlZ3vbIgcVB6qDcQgXgTgWhh+Xh6uJo6hl7faOLBWqRUjwOqhTlbV\nAnV0sBGz8lj/l8agVrROIh/Wi3p4OCTHCawE3Am27K4r+q7wDasb4LA/rUYY0DL/\n44AMgEo+ZDG9dkQUv81HWCmrl2McJmpBggRaBsbbOZjqRbyZH4bPbDPC8MLp4j1V\nV94/5wCpmWTpWLD3Qyom7ge6CVZOhRZ23GDEWrJ6gJfviWeq758q2AAVRVRer9e0\nEDY0ztSDBa2x/5Ek32nHorXG1D6woSTUZ/TFE3uf6wKBgQDQlBwkFhhNdw6NBqLx\nui6vt/WDGPjVVSOs33QS/wTa2xLHlPOZIrrZAvqu14r3WKc581dgEExlIGY/V0ap\n75kuXXvSZcIRQR6nizv9+ZL1bRA6YgYw1JfAhWzSDBplfLyXixyneFWHGtDkLbF5\nCDN5TUMjtIZuw2tvVMFp9v2FLwKBgQDBR9PazmOnyg7jXufucYLHGHGpQEBK8xjt\nyY2/YVIbMTVHlnXrtkdyqhhlglsIaG+KO06prZNFI8aH+bRRqY5sM6QpqS4Qqcwr\n56VTqgtdNyzIr/waWILDpkKD7F797B+ImhEOFNEFgY6CtZ0cR3MFTacorLFSMKus\nEoIMuFqNOwKBgBoEj6oUs31eP4tp64N5tP8oVFDBGbEKyMN0sDb6ZrGiKCqLMwPE\nKEiPrZOHwYbvIRUCfMC357+plfeKvH7QK2x0LtDk7ptWYyuFG7unmSRSMXcG6TzI\nGBHk0tk0t0o3kBLbQHzHbuvGdY4xAPVXB4y3DYvzpd1FNS6TBPlh3OfzAoGAICep\n+DHz5Fs6RNtqLIIX5rWLW0QELjPpRs4MVfWD6mAyY/mFHrTRiCMCMgkQygJN5Cpf\nuNzWrl74TXDebeOOfTPOMNwjfMQy4m8EUznr8BMY0T5t65gkERac5EOzvfzFdj1j\nbvtJlufp5JcAT08XtJ8pmxu32F ueg98EYcdd0TcCgYAngjlNrSSKW9ZciQDCSbAC\n5xRyh5dg/HprJXPotm0cvquhdi3ABP8FH0nbEvSjDiTqGthP52XqRx029s2g8ApA\nSp/vruaqZu5otY9LY1GI138d78LAJgbBQNDGeQ/dVEXJOWqoy6ff5LhPWg5w2Cqp\ngbFwYoY2ZrD82uosnm1mng==\n-----END PRIVATE KEY-----\n',
 		client_email: 'bigquery-client-admin@staging-199507.iam.gserviceaccount.com'
 	}
 })
@@ -118,10 +119,10 @@ Raven.context(async function () {
 	const router = express.Router()
 
 	// ads xml using custom cors
-	let corsOptions = {
-		origin: true,
-		credentials: true
-	}
+	// let corsOptions = {
+	// 	origin: true,
+	// 	credentials: true
+	// }
 	// Enable cors
 	app.use(cors())
 
@@ -185,6 +186,9 @@ Raven.context(async function () {
 	router.post('/userdata/preference', authPassport.validate({ scope: scopes.preferenceInsert, credentialsRequired: false }), HandlerPreference.postNewPreference)
 	router.put('/userdata/preference', authPassport.validate({ scope: scopes.preferenceUpdate, credentialsRequired: false }), HandlerPreference.UpdatePreference)
 	router.delete('/userdata/:id/preference', authPassport.validate({ scope: scopes.preferenceDelete, credentialsRequired: false }), HandlerPreference.deletePreference)
+
+	// route video-favorite
+	router.post('/userdata/favorites', authPassport.validate({ scope: scopes.favoritesInsert, credentialsRequired: false }), HandlerFavorites.postNewFavorite)
 
 	router.get('/', function (req, res, next) {
 		res.end()

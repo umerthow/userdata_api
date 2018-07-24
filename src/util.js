@@ -296,8 +296,6 @@ Util.createVideo = async (res) => {
 		result.attributes[newKey] = res[key]
 	}
 
-	console.log(result)
-
 	return new Promise((resolve, reject) => {
 		resolve(result)
 	})

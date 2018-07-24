@@ -29,7 +29,7 @@ module.exports = function (sequelize, DataTypes) {
 			allowNull: true
 		},
 		video_id: {
-			type: DataTypes.STRING(255),
+			type: DataTypes.CHAR(10),
 			allowNull: true
 		}
 	}, {

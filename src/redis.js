@@ -173,6 +173,18 @@ class Redis {
 		this.delRedis(redisKey)
 	}
 
+	/* USER VIDEO FAVORITES S */
+	setFavoritesById (favoriteId, value, ttl, projectId) {
+		let redisKey = projectId + ':preference:id:' + favoriteId
+		this.setRedis(redisKey, value, ttl)
+	}
+
+	getFavoritesById (preferenceId, projectId) {
+		let redisKey = projectId + ':preference:id:' + preferenceId
+		return this.getRedis(redisKey)
+	}
+	/* USER VIDEO HISTORY E */
+
 	// playlist by ID
 	setPlaylistById (playlistId, value, ttl, projectId) {
 		let redisKey = projectId + ':playlist:id:' + playlistId

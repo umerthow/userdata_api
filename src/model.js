@@ -1,12 +1,11 @@
-import { dbSeq_video, dbSeq_user } from './sequelize.js'
-const DataTypes = require('sequelize')
+import { dbSeqVideo, dbSeqUser } from './sequelize.js'
+import path from 'path'
 
 export const DBUser = {
 	// datatabse userdata
-	Preferences: dbSeq_user.import(__dirname + '/model_userdata/preferences'),
-	VideoFavorites: dbSeq_user.import(__dirname + '/model_userdata/video_favorites'),
-	VideoHistory: dbSeq_user.import(__dirname + '/model_userdata/video_history')
-
+	Preferences: dbSeqUser.import(path.join(__dirname, '/model_userdata/preferences')),
+	VideoFavorites: dbSeqUser.import(path.join(__dirname, '/model_userdata/video_favorites')),
+	VideoHistory: dbSeqUser.import(path.join(__dirname, '/model_userdata/video_history'))
 }
 
 export const DBModel = {
@@ -23,5 +22,5 @@ export const DBModel = {
 	// Teams: dbSeq_video.import(__dirname + "/model_video/teams"),
 	// VideoAds: dbSeq_video.import(__dirname + "/model_video/video_ads"),
 	// VideoQualities: dbSeq_video.import(__dirname + "/model_video/video_qualities"),
-	Videos: dbSeq_video.import(__dirname + '/model_video/videos')
+	Videos: dbSeqVideo.import(path.join(__dirname, '/model_video/videos'))
 }

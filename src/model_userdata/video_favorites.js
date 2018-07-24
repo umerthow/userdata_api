@@ -23,6 +23,10 @@ module.exports = function (sequelize, DataTypes) {
 		deleted_at: {
 			type: DataTypes.DATE,
 			allowNull: true
+		},
+		video_id: {
+			type: DataTypes.CHAR(50),
+			allowNull: true
 		}
 	}, {
 		tableName: 'video_favorites',

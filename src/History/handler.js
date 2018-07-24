@@ -138,6 +138,10 @@ let getHistoryData = (hs, useRelationships, projectId) => {
 	})
 }
 
+HandlerHistory.custumSort = (a, b) => {
+	return new Date(b.attributes.updatedAt).getTime() - new Date(a.attributes.updatedAt).getTime()
+}
+
 HandlerHistory.getHistoryByID = (req, res, next) => {
 	let useRelationships = req.query.relationships ? parseInt(req.query.relationships) : 1
 	const projectId_ = _.get(res, 'locals.projectId', null)
@@ -190,8 +194,11 @@ HandlerHistory.getHistoryByID = (req, res, next) => {
 				debugger
 				return getHistoryData(rows, useRelationships, projectId_)
 			}).then((data) => {
+				let newdata = {}
+				console.log(data.data)
+				var sortData = data.data.sort(HandlerHistory.custumSort)
 				res.setHeader('content-type', 'application/vnd.api+json')
-				res.json(data)
+				res.json({ data: sortData })
 			}).catch(function (err) {
 				return next(err)
 			})

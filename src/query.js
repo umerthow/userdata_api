@@ -250,16 +250,16 @@ Query.patchVideo = (videoID, vid, projectId) => {
 
 	for (let key in attributes) {
 		let val = attributes[key]
-		if (key == 'matchStart' || key == 'matchEnd' || key == 'expireAt') {
+		if (key === 'matchStart' || key === 'matchEnd' || key === 'expireAt') {
 			val = moment(val, 'YYYYMMDD hh:mm:ss')
 		}
 		queryData[convertJSONKey(key)] = val
 	}
 
 	for (let key in relationships) {
-		if (key == 'home') {
+		if (key === 'home') {
 			queryData['home_team_id'] = relationships.home.data.id
-		} else if (key == 'away') {
+		} else if (key === 'away') {
 			queryData['away_team_id'] = relationships.away.data.id
 		}
 	}
@@ -353,7 +353,50 @@ Query.deletePreference = (preferenceID, projectId) => {
 		deleted_at: Sequelize.literal('CURRENT_TIMESTAMP')
 	}, {
 		where: {
-			uid: preferenceID
+			id: preferenceID
+			//       project_id: projectId
+		}
+	})
+}
+
+/// ////////////////////
+/// VIDEO FAVORITES ////
+/// ///////////////////
+
+Query.insertFavortites = (fv, projectId) => {
+	// modify dates value
+	let createdAt = moment().format('YYYY-MM-DD HH:mm:SS')
+	return DBUser.VideoFavorites.create({
+		uid: fv.uid,
+		video_id: fv.videoId,
+		created_at: createdAt
+
+		// project_id: projectId
+	})
+}
+
+Query.UpdateFavorites = (fv, projectId) => {
+	let updatedAt = moment().format('YYYY-MM-DD HH:mm:SS')
+	return DBUser.VideoFavorites.update({
+		video_id: fv.videoId,
+		updated_at: updatedAt
+	}, {
+		where: {
+			uid: fv.uid,
+			id: fv.id
+			//       project_id: projectId
+		}
+	})
+}
+
+Query.deleteFavorites = (fv, projectId) => {
+	return DBUser.VideoFavorites.update({
+		status: 0,
+		deleted_at: Sequelize.literal('CURRENT_TIMESTAMP')
+	}, {
+		where: {
+			id: fv.id
+			//       project_id: projectId
 		}
 	})
 }
