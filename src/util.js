@@ -1,9 +1,10 @@
+import _ from 'lodash'
 const config = require('config')
 const query = require('./query.js')
-const redis = require('./redis.js')
+const Redis = require('./redis.js')
 
 // redis client
-const client = new redis(config.redis.port, config.redis.host)
+const client = new Redis(config.redis.port, config.redis.host)
 const ttl = config.redis.ttl
 
 const Util = {}
@@ -17,7 +18,6 @@ Util.newJSONAPIObject = () => {
 Util.createVidHistoryWithJSON = (vh, useRelationships, projectId) => {
 	// console.log(vh);
 	let videoData = Util.createHistoryJSON(vh, useRelationships, 1)
-	let getHistory = []
 	// console.log(videoData);
 	return Promise.resolve(videoData)
 }
@@ -38,9 +38,6 @@ Util.createPreferenceJSON = (pf, useRelationships) => {
 }
 
 Util.createHistoryJSON = (his, useRelationships) => {
-	console.log(his)
-	let isFree
-
 	let id_ = 1
 	return {
 		type: 'user-video-history',
@@ -58,7 +55,7 @@ Util.createHistoryJSON = (his, useRelationships) => {
 
 Util.createPlaylistJSON = (pl) => {
 	let isFree
-	if (pl.id == config.playlist.free) {
+	if (pl.id === config.playlist.free) {
 		isFree = true
 	} else {
 		isFree = pl.parent_id != null ? pl.parent_id.split(' ').indexOf(config.playlist.free) >= 0 : false
@@ -94,21 +91,21 @@ Util.createVideoJSON = (vid, useRelationships, useStreamUrl) => {
 			fullDescription: vid.full_description || null,
 			visibility: vid.visibility,
 			permission: vid.permission,
-			type: vid.content_type,
-			language: vid.audio_language,
-			subtitle: vid.subtitle_language,
-			views: vid.views_count,
-			likes: vid.likes_count,
+			contentType: vid.content_type,
+			audioLanguage: vid.audio_language,
+			subtitleLanguage: vid.subtitle_language,
+			viewsCount: vid.views_count,
+			likesCount: vid.likes_count,
 			rating: Number(vid.rating),
 			source: vid.source,
-			url: vid.preview_url, // "`http://supersoccer.tv/video/watch?v=${vid.id}`", , // temporary - quick fix for polytron
-			cover: vid.cover_url,
-			background: vid.background_url || '',
+			previewUrl: vid.preview_url, // "`http://supersoccer.tv/video/watch?v=${vid.id}`", , // temporary - quick fix for polytron
+			coverUrl: vid.cover_url,
+			backgroundUrl: vid.background_url || '',
 			previews: [], // vid.preview_url ? vid.preview_url.split(",") : [], // temporary - quick fix for polytron
-			trailer: vid.trailer_url ? vid.trailer_url.split(',') : ['previewUrl.1', 'previewUrl.2', 'previewUrl.3'],
+			trailerUrl: vid.trailer_url ? vid.trailer_url.split(',') : ['previewUrl.1', 'previewUrl.2', 'previewUrl.3'],
 			duration: vid.duration,
-			start: vid.match_start,
-			end: vid.match_end,
+			matchStart: vid.match_start,
+			matchEnd: vid.match_end,
 			displayOrder: vid.display_order,
 			expireAt: vid.expire_at,
 			createdAt: vid.created_at
@@ -166,7 +163,7 @@ Util.createVideoWithPlaylistJSON = (vid, useRelationships, projectId) => {
 							new Promise((resolve, reject) => {
 								client.getPlaylistById(playlistId, projectId).then((result) => {
 									if (result != null) {
-										if (result != 'undefined') {
+										if (result !== 'undefined') {
 											playlists.push(result)
 										}
 										resolve()
@@ -224,7 +221,7 @@ Util.createVideoQualityJSON = (vq) => {
 
 Util.createPlaylistJSON = (pl) => {
 	let isFree
-	if (pl.id == config.playlist.free) {
+	if (pl.id === config.playlist.free) {
 		isFree = true
 	} else {
 		isFree = pl.parent_id != null ? pl.parent_id.split(' ').indexOf(config.playlist.free) >= 0 : false
@@ -281,12 +278,43 @@ Util.createVideoHistoryWithJSON = (hs, useRelationships, projectId) => {
 	})
 }
 
-Util.createVideo = (res) => {
-	let hsData = Util.createVideoJSON(res)
+Util.createVideo = async (res) => {
+	// let hsData = Util.createVideoJSON(res)
+
+	// return new Promise((resolve, reject) => {
+	// 	resolve(hsData)
+	// })
+
+	let result = {
+		id: res.id,
+		type: 'video',
+		attributes: {}
+	}
+	delete res.id
+	for (const key in res) {
+		const newKey = await _.camelCase(key)
+		result.attributes[newKey] = res[key]
+	}
+
+	console.log(result)
 
 	return new Promise((resolve, reject) => {
-		resolve(hsData)
+		resolve(result)
 	})
+}
+
+Util.toJSONApi = async (data, type) => {
+	let result = {
+		id: data.id,
+		type,
+		attributes: {}
+	}
+	delete data.id
+	for (const key in data) {
+		const newKey = await _.camelCase(key)
+		result.attributes[newKey] = data[key]
+	}
+	return result
 }
 
 Util.createPlaylistWithVideoJSON = (pl, useRelationships, projectId) => {
@@ -304,12 +332,6 @@ Util.createPlaylistWithVideoJSON = (pl, useRelationships, projectId) => {
 	} else { // no relationships needed
 		plData.relationships = {}
 		return Promise.resolve(plData)
-	}
-
-	let insertVideos = (result) => {
-		for (let vid of result) {
-			plData.relationships.video.data.push({ type: 'video', id: vid.id })
-		}
 	}
 
 	// get video relationship
@@ -412,7 +434,7 @@ Util.createTeamJSON = (te) => {
 	}
 }
 
-Util.getTeamByIDs = (teamIDs) => {
+Util.getTeamByIDs = (teamIDs, projectId) => {
 	let teams = []
 	let getTeams = []
 	return new Promise((resolve, reject) => {

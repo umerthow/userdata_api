@@ -39,7 +39,7 @@ redis:
   ttl: 3600
 
 sentry:
-  dsn: {}
+  dsn: DSN
 
 Harmonics: 
   script: /path/to/videos-api/src/scripts/akamai_token_v2.py 

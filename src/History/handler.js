@@ -13,15 +13,15 @@ const bigquery = new BigQuery({
 
 const query = require('../query.js')
 const config = require('config')
-const redis = require('../redis.js')
-const client = new redis(config.redis.port, config.redis.host)
+const Redis = require('../redis.js')
+const client = new Redis(config.redis.port, config.redis.host)
 const ttl = config.redis.ttl
 
 const HandlerHistory = {}
 
 let getHistoryData = (hs, useRelationships, projectId) => {
 	let data = util.newJSONAPIObject()
-	debugger
+
 	return new Promise((resolve, reject) => {
 		new Promise((resolve, reject) => {
 			resolve(hs)
@@ -57,7 +57,7 @@ let getHistoryData = (hs, useRelationships, projectId) => {
 						debugger
 						client.getVideoById(data_.attributes.videoId, projectId).then((result) => {
 							if (result != null) {
-								console.log('cek itt a')
+								console.log('cek redis')
 
 								return new Promise((resolve, reject) => {
 									util.createVideo(result).then((res) => {
@@ -69,8 +69,19 @@ let getHistoryData = (hs, useRelationships, projectId) => {
 								query.getVideo(data_.attributes.videoId, projectId).then((result) => {
 									if (result.length) {
 										// data.videos.data.push(result[0]);
-										data_.attributes.videos.push(result[0])
-										client.setVideoById(data_.attributes.videoId, result[0], ttl, projectId)
+										// data_.attributes.videos.push(result[0])
+										// console.log(result)
+										let allData = result[0].dataValues
+										debugger
+										console.log(allData)
+										return new Promise(async (resolve, reject) => {
+											util.createVideo(allData).then((res) => {
+												data_.attributes.videos.push(res)
+												resolve()
+											})
+
+											client.setVideoById(data_.attributes.videoId, result[0], ttl, projectId)
+										})
 									} else {
 										data_.attributes.videos.push({ 'videos': 'not_found' })
 									}
@@ -79,6 +90,8 @@ let getHistoryData = (hs, useRelationships, projectId) => {
 							}
 						})
 					})
+
+					x.then(console.log(x))
 				}
 
 				for (let it of hs) {
@@ -111,7 +124,15 @@ let getHistoryData = (hs, useRelationships, projectId) => {
 					})
 				})
 			}) // get unique team id to include them into json result
-			.then(() => {
+			.then((videos) => {
+				console.log('cek delete')
+				for (let item of data.data) {
+					delete item.attributes.videoId
+				}
+
+				return Promise.resolve(data)
+			}).then(() => {
+				console.log('log terakhir')
 				resolve(data)
 			})
 	})
@@ -176,6 +197,8 @@ HandlerHistory.getHistoryByID = (req, res, next) => {
 			})
 		})
 	})
+
+	p.then(console.log(res))
 }
 
 module.exports = HandlerHistory
