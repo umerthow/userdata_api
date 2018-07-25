@@ -19,8 +19,7 @@ HandleFavorites.postNewFavorite = (req, res, next) => {
 	// resolve if playlists relationship is empty
 		.then(() => {
 			// remove from redis
-			client.delPreferenceById(data.uid, projectId)
-
+			client.delUserVidFavorites(data.uid, projectId)
 			res.setHeader('content-type', 'application/vnd.api+json')
 			res.json(data)
 		}).catch(err => {

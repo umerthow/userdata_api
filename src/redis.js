@@ -157,6 +157,25 @@ class Redis {
 
 	/* USER VIDEO HISTORY E */
 
+	/* USER VIDEO FAVORITES S */
+
+	getUserVidFavorites (projectId, userID) {
+		let redisKey = projectId + ':vidfavorite:id:' + userID
+		return this.getRedis(redisKey)
+	}
+
+	setUserVidFavorites (userID, value, ttl, projectId) {
+		let redisKey = projectId + ':vidfavorite:id:' + userID
+		this.setRedis(redisKey, value, ttl)
+	}
+
+	delUserVidFavorites (value, ttl, projectId, userID) {
+		let redisKey = projectId + ':vidfavorite:id:' + userID
+		this.delRedis(redisKey)
+	}
+
+	/* USER VIDEO FAVORITES E */
+
 	// Preference by ID
 	setPreferenceById (preferenceId, value, ttl, projectId) {
 		let redisKey = projectId + ':preference:id:' + preferenceId
