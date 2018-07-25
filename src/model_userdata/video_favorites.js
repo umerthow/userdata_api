@@ -9,7 +9,7 @@ module.exports = function (sequelize, DataTypes) {
 			autoIncrement: true
 		},
 		uid: {
-			type: DataTypes.INTEGER(11),
+			type: DataTypes.STRING(100),
 			allowNull: true
 		},
 		created_at: {

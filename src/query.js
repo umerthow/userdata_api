@@ -363,13 +363,24 @@ Query.deletePreference = (preferenceID, projectId) => {
 /// VIDEO FAVORITES ////
 /// ///////////////////
 
-Query.insertFavortites = (fv, projectId) => {
+Query.getFavoritesByIDs = (id, projectId) => {
+	return DBUser.VideoFavorites.findAll({
+		where: {
+			uid: id
+		},
+		attributes: {
+			exclude: ['deleted_at']
+		},
+		raw: true
+	}).then(result => result)
+}
+
+Query.insertFavorites = (fv, projectId) => {
 	// modify dates value
-	let createdAt = moment().format('YYYY-MM-DD HH:mm:SS')
+
 	return DBUser.VideoFavorites.create({
 		uid: fv.uid,
-		video_id: fv.videoId,
-		created_at: createdAt
+		video_id: fv.videoId
 
 		// project_id: projectId
 	})
@@ -391,16 +402,22 @@ Query.UpdateFavorites = (fv, projectId) => {
 
 Query.deleteFavorites = (fv, projectId) => {
 	return DBUser.VideoFavorites.update({
-		status: 0,
 		deleted_at: Sequelize.literal('CURRENT_TIMESTAMP')
 	}, {
 		where: {
+			uid: fv.uid,
 			id: fv.id
 			//       project_id: projectId
 		}
 	})
 }
 
+/// ///////////////////////
+/// CUSTOM PLAYLISTS /////
+/// /////////////////////
+Query.insertCustPlaylist = () => {
+
+}
 /// ////////////////////
 /// /// PLAYLISTS /////
 /// //////////////////

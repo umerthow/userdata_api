@@ -20,6 +20,9 @@ import util from './util'
 const HandlerHistory = require('./History/handler.js')
 const HandlerPreference = require('./Preference/handler.js')
 const HandlerFavorites = require('./Favorites/handler.js')
+const HandlerCustomPlaylist = require('/Custom_Playlist/handler.js
+')
+// const HandlePlaylist =  require('./')
 // const HandlerVideo = require('./Video/handler.js');
 // const HandlerPlaylist = require('./Playlist/handler.js');
 // const HandlerAd = require('./Ad/handler.js');
@@ -109,7 +112,7 @@ Raven.context(async function () {
 	app.use(
 		morgan(
 			`${
-				process.env.WORKER_ID
+			process.env.WORKER_ID
 			} :remote-addr - :remote-user [:date[clf]] ":method :url HTTP/:http-version" :status :res[content-length] ":referrer" ":user-agent"`
 		)
 	)
@@ -189,6 +192,12 @@ Raven.context(async function () {
 
 	// route video-favorite
 	router.post('/userdata/favorites', authPassport.validate({ scope: scopes.favoritesInsert, credentialsRequired: false }), HandlerFavorites.postNewFavorite)
+	router.get('/userdata/:id/favorites', authPassport.validate({ scope: scopes.favoritesRead, credentialsRequired: false }), HandlerFavorites.getFavoritesByID)
+	router.put('/userdata/favorites', authPassport.validate({ scope: scopes.favoritesUpdate, credentialsRequired: false }), HandlerFavorites.UpdateFavorite)
+	router.delete('/userdata/:id/favorites', authPassport.validate({ scope: scopes.favoritesDelete, credentialsRequired: false }), HandlerFavorites.deleteFavorite)
+
+	// route custom playlist
+	router.post('/userdata/playlist', authPassport.validate({ scope: scopes.playlistInsert, credentialsRequired: false }), HandlerCustomPlaylist.postNewPlaylist)
 
 	router.get('/', function (req, res, next) {
 		res.end()
@@ -200,7 +209,7 @@ Raven.context(async function () {
 	app.use(Raven.errorHandler())
 
 	// Optional fallthrough error handler
-	app.use(function onError (err, req, res, next) {
+	app.use(function onError(err, req, res, next) {
 		if (err.name === 'UnauthorizedError') {
 			// error validate token such as expired
 			res.status(401).end()

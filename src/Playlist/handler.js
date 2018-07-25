@@ -32,7 +32,7 @@ let getPlaylistData = (pl, useRelationships, projectId) => {
 				})
 			})
 		})
-		// get unique video id to include them into json result
+			// get unique video id to include them into json result
 			.then(() => {
 				if (!useRelationships) {
 					return Promise.resolve([])
@@ -80,7 +80,7 @@ let getPlaylistData = (pl, useRelationships, projectId) => {
 					data.included.push(util.createVideoJSON(vid, 0, 0))
 				}
 			})
-		// get unique team id to include them into json result
+			// get unique team id to include them into json result
 			.then(() => {
 				let teamIDs = []
 

@@ -194,7 +194,7 @@ HandlerHistory.getHistoryByID = (req, res, next) => {
 				debugger
 				return getHistoryData(rows, useRelationships, projectId_)
 			}).then((data) => {
-				let newdata = {}
+				// let newdata = {}
 				console.log(data.data)
 				var sortData = data.data.sort(HandlerHistory.custumSort)
 				res.setHeader('content-type', 'application/vnd.api+json')

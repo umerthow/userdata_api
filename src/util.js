@@ -37,6 +37,20 @@ Util.createPreferenceJSON = (pf, useRelationships) => {
 	}
 }
 
+Util.createFavoriteJSON = (fvs, useRelationships) => {
+	return {
+		type: 'user-video-favorites',
+		id: fvs.id,
+		attributes: {
+			uid: fvs.uid,
+			updatedAt: fvs.updated_at,
+			videoId: fvs.video_id
+
+		}
+
+	}
+}
+
 Util.createHistoryJSON = (his, useRelationships) => {
 	let id_ = 1
 	return {
@@ -262,6 +276,11 @@ Util.createPreferenceWithJSON = (pf, useRelationships, projectId) => {
 	})
 }
 
+// createFavoriteWithJSON
+Util.createFavoriteWithJSON = (fv, useRelationships, projectId) => {
+
+}
+
 // createVideoHistoryJSON
 
 Util.createVideoHistoryWithJSON = (hs, useRelationships, projectId) => {
@@ -275,6 +294,21 @@ Util.createVideoHistoryWithJSON = (hs, useRelationships, projectId) => {
 
 	return new Promise((resolve, reject) => {
 		resolve(hsData)
+	})
+}
+
+Util.createFavorites = async (res) => {
+	let result = {
+		id: res.id,
+		type: 'video-favorites',
+		attributes: {}
+	}
+	result.attributes.updatedAt = res.updated_at
+	result.attributes.videoId = res.video_id
+	result.attributes.videos = []
+
+	return new Promise((resolve, reject) => {
+		resolve(result)
 	})
 }
 
