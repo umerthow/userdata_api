@@ -5,7 +5,9 @@ export const DBUser = {
 	// datatabse userdata
 	Preferences: dbSeqUser.import(path.join(__dirname, '/model_userdata/preferences')),
 	VideoFavorites: dbSeqUser.import(path.join(__dirname, '/model_userdata/video_favorites')),
-	VideoHistory: dbSeqUser.import(path.join(__dirname, '/model_userdata/video_history'))
+	VideoHistory: dbSeqUser.import(path.join(__dirname, '/model_userdata/video_history')),
+	CustomePlaylistDet: dbSeqUser.import(path.join(__dirname, '/model_userdata/custom_playlists_details')),
+	CustomePlaylistVid: dbSeqUser.import(path.join(__dirname, '/model_userdata/custom_playlists_videos'))
 }
 
 export const DBModel = {

@@ -335,6 +335,22 @@ Util.createVideo = async (res) => {
 	})
 }
 
+Util.toPlaylistVidApi = async (data, type) => {
+	let result = {
+		id: data.id,
+		type: 'custom-playlist',
+		attributes: {}
+	}
+	delete data.id
+	delete data.deletedAt
+	for (const key in data) {
+		const newKey = await _.camelCase(key)
+		result.attributes[newKey] = data[key]
+	}
+	result.attributes.videos = []
+	return result
+}
+
 Util.toJSONApi = async (data, type) => {
 	let result = {
 		id: data.id,

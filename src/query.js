@@ -1,5 +1,6 @@
 // const DBModel = require('./model.js');
 import { DBModel, DBUser } from './model.js'
+import { dbSeqUser } from './sequelize.js'
 const Sequelize = require('sequelize')
 
 const moment = require('moment')
@@ -85,7 +86,8 @@ Query.getVideo = (videoID, projectId) => {
 			'display_order',
 			'expire_at',
 			'created_at'
-		]
+		],
+		raw: true
 	})
 }
 
@@ -415,8 +417,34 @@ Query.deleteFavorites = (fv, projectId) => {
 /// ///////////////////////
 /// CUSTOM PLAYLISTS /////
 /// /////////////////////
-Query.insertCustPlaylist = () => {
+Query.insertCustPlaylist = (ply, projectid) => {
+	return DBUser.CustomePlaylistDet.create({
+		playlist_name: ply.playlistName,
+		uid: ply.uid,
+		project_id: projectid,
+		is_private: ply.isPrivate
+	})
+	// .then(result => {
+	// 	debugger
+	// 	return result
+	// })
+	// .catch(error => {
+	// 	debugger
+	// 	return error
+	// })
+}
 
+Query.getCustPLaylist = (Uid, projectId) => {
+	return dbSeqUser.query('SELECT a.*,b.video_id from userdata.custom_playlists_details a left join custom_playlists_videos b on a.id = b.playlist_id WHERE a.uid =? ',
+		{ replacements: [Uid], type: dbSeqUser.QueryTypes.SELECT }
+	)
+}
+
+Query.insertCustPlaylistVid = (plyv) => {
+	return DBUser.CustomePlaylistVid.create({
+		video_id: plyv.videoId,
+		playlist_id: plyv.playlistId
+	})
 }
 /// ////////////////////
 /// /// PLAYLISTS /////

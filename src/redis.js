@@ -24,7 +24,6 @@ class Redis {
 				if (reply == null) {
 					return resolve(reply)
 				}
-
 				try {
 					let result = JSON.parse(reply)
 					return resolve(result)
@@ -203,6 +202,24 @@ class Redis {
 		return this.getRedis(redisKey)
 	}
 	/* USER VIDEO HISTORY E */
+
+	/* USER CUSTOM PLAYLIST  S */
+
+	setCustPlaylistbyID (playlistId, value, ttl, projectId) {
+		let redisKey = projectId + ':custom_playlist:id:' + playlistId
+		this.setRedis(redisKey, value, ttl)
+	}
+
+	delCustPlaylist (playlistId, projectId) {
+		let redisKey = projectId + ':custom_playlist:id:' + playlistId
+		this.delRedis(redisKey)
+	}
+
+	getCustPlaylist (playlistId, projectId) {
+		let redisKey = projectId + ':custom_playlist:id:' + playlistId
+		return this.getRedis(redisKey)
+	}
+	/* USER CUSTOM PLAYLIST  E */
 
 	// playlist by ID
 	setPlaylistById (playlistId, value, ttl, projectId) {
