@@ -205,6 +205,7 @@ HandlerPlaylist.postNewVidPlaylist = async (req, res, next) => {
 		let processInsert = await query.insertCustPlaylistVid(data, projectId)
 		if (processInsert instanceof Error) throw processInsert
 
+		client.delCustPlaylist(data.userId, projectId)
 		res.json(processInsert)
 	} catch (error) {
 		let newError = error.errors[0]
