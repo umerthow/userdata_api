@@ -440,6 +440,44 @@ Query.getCustPLaylist = (Uid, projectId) => {
 	)
 }
 
+Query.deleteVidPLaylist = (ply) => {
+	return DBUser.CustomePlaylistVid.update({
+		deleted_at: Sequelize.literal('CURRENT_TIMESTAMP')
+	}, {
+		where: {
+			id: ply.id
+			//       project_id: projectId
+		}
+	})
+}
+
+Query.deleteCustPlaylist = (ply) => {
+	return DBUser.CustomePlaylistDet.update({
+		deleted_at: Sequelize.literal('CURRENT_TIMESTAMP')
+	}, {
+		where: {
+			uid: ply.uid,
+			id: ply.id
+			//       project_id: projectId
+		}
+	})
+}
+
+Query.updateCustPlaylist = (ply) => {
+	let updatedAt = moment().format('YYYY-MM-DD HH:mm:SS')
+	return DBUser.CustomePlaylistDet.update({
+		playlist_name: ply.playlistName,
+		is_private: ply.isPrivate,
+		updated_at: updatedAt
+	}, {
+		where: {
+			uid: ply.uid,
+			id: ply.id
+			//       project_id: projectId
+		}
+	})
+}
+
 Query.insertCustPlaylistVid = (plyv) => {
 	return DBUser.CustomePlaylistVid.create({
 		video_id: plyv.videoId,

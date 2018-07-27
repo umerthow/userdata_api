@@ -199,6 +199,10 @@ Raven.context(async function () {
 	router.post('/userdata/playlist', authPassport.validate({ scope: scopes.playlistInsert, credentialsRequired: false }), HandlerPlaylist.postNewPlaylist)
 	router.post('/userdata/playlist/videos', authPassport.validate({ scope: scopes.VidPlaylistInsert, credentialsRequired: false }), HandlerPlaylist.postNewVidPlaylist)
 	router.get('/userdata/:id/playlist', authPassport.validate({ scope: scopes.playlistRead, credentialsRequired: false }), HandlerPlaylist.readCustPlaylist)
+	router.put('/userdata/playlist', authPassport.validate({ scope: scopes.playlistUpdate, credentialsRequired: false }), HandlerPlaylist.updateCustPlaylist)
+	// delete playlist and video playlist
+	router.delete('/userdata/:id/playlist', authPassport.validate({ scope: scopes.playlistDelete, credentialsRequired: false }), HandlerPlaylist.deletePlaylist)
+	router.delete('/userdata/:id/playlist/videos', authPassport.validate({ scope: scopes.playlistDelete, credentialsRequired: false }), HandlerPlaylist.deleteVidPlaylist)
 
 	router.get('/', function (req, res, next) {
 		res.end()

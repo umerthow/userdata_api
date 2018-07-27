@@ -194,7 +194,6 @@ HandleFavorites.getFavoritesByID = (req, res, next) => {
 	const projectId = _.get(res, 'locals.projectId', null)
 
 	let useRelationships = req.query.relationships ? parseInt(req.query.relationships) : 1
-	let favorit = []
 	// get Preference from redis
 	client.getUserVidFavorites(projectId, userID).then((result) => {
 		if (result != null) {
@@ -233,7 +232,6 @@ HandleFavorites.getFavoritesByID = (req, res, next) => {
 				resolve(datas)
 			}
 		})
-
 	}).then((data) => {
 		res.setHeader('content-type', 'application/vnd.api+json')
 		res.json(data)

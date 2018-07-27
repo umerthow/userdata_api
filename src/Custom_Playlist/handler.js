@@ -214,6 +214,74 @@ HandlerPlaylist.readCustPlaylist = async (req, res, next) => {
 	}
 }
 
+HandlerPlaylist.deleteVidPlaylist = async (req, res, next) => {
+	let data = req.body
+	console.log(req.body)
+	const projectId = _.get(res, 'locals.projectId', null)
+	try {
+		let processDelete = await query.deleteVidPLaylist(data, projectId)
+		if (processDelete instanceof Error) throw processDelete
+		debugger
+		// client.delCustPlaylist(data.userId, projectId)
+		res.json(processDelete)
+	} catch (error) {
+		debugger
+		let newError = error.errors[0]
+		let errMessages = {
+			'message': newError.message,
+			'status': 400
+		}
+
+		res.status(400).json(errMessages)
+	}
+}
+
+HandlerPlaylist.deletePlaylist = async (req, res, next) => {
+	let data = req.body
+	console.log(req.body)
+	const projectId = _.get(res, 'locals.projectId', null)
+	try {
+		let processDelete = await query.deleteCustPlaylist(data, projectId)
+		if (processDelete instanceof Error) throw processDelete
+		debugger
+		client.delCustPlaylist(data.userId, projectId)
+		res.json(processDelete)
+	} catch (error) {
+		debugger
+		let newError = error.errors[0]
+		let errMessages = {
+			'message': newError.message,
+			'status': 400
+		}
+
+		res.status(400).json(errMessages)
+	}
+}
+
+HandlerPlaylist.updateCustPlaylist = async (req, res, next) => {
+	console.log(req.body)
+	let data = req.body
+	const projectId = _.get(res, 'locals.projectId', null)
+
+	// let useRelationships = req.query.relationships ? parseInt(req.query.relationships) : 1
+	try {
+		let procossUpdate = await query.updateCustPlaylist(data, projectId)
+		if (procossUpdate instanceof Error) throw procossUpdate
+		debugger
+		client.delCustPlaylist(data.userId, projectId)
+		res.json(data)
+	} catch (error) {
+		debugger
+		let newError = error.errors[0]
+		let errMessages = {
+			'message': newError.message,
+			'status': 400
+		}
+
+		res.status(400).json(errMessages)
+	}
+}
+
 HandlerPlaylist.postNewVidPlaylist = async (req, res, next) => {
 	console.log(req.body)
 	let data = req.body
