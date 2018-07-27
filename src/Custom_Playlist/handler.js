@@ -17,8 +17,6 @@ let getVidPlaylist = (hs, useRelationships, projectId) => {
 
 	return new Promise((resolve, reject) => {
 		new Promise((resolve, reject) => {
-			debugger
-			console.log(hs)
 			resolve(hs)
 		}).then((result) => {
 			return result.map((hs) => {
@@ -53,7 +51,7 @@ let getVidPlaylist = (hs, useRelationships, projectId) => {
 						client.getVideoById(data_.attributes.videoId, projectId).then((result) => {
 							if (result != null) {
 								console.log('cek redis')
-
+								debugger
 								return new Promise((resolve, reject) => {
 									Util.createVideo(result).then((res) => {
 										data_.attributes.videos.push(res)
@@ -66,7 +64,7 @@ let getVidPlaylist = (hs, useRelationships, projectId) => {
 										// data.videos.data.push(result[0]);
 										// data_.attributes.videos.push(result[0])
 										// console.log(result)
-										let allData = result[0].dataValues
+										let allData = result[0]
 										debugger
 										console.log(allData)
 										return new Promise(async (resolve, reject) => {
@@ -90,6 +88,7 @@ let getVidPlaylist = (hs, useRelationships, projectId) => {
 				}
 
 				for (let it of hs) {
+					debugger
 					videoIds.push(it.video_id)
 				}
 
@@ -164,23 +163,43 @@ HandlerPlaylist.readCustPlaylist = async (req, res, next) => {
 	let userID = req.params.id
 	console.log(userID)
 	const projectId = _.get(res, 'locals.projectId', null)
-
-	var data = Util.newJSONAPIObject()
 	debugger
 	try {
+		debugger
 		client.getCustPlaylist(userID, projectId).then(result => {
 			if (result != null) {
 				debugger
 				return result
 			} else {
 				return query.getCustPLaylist(userID, projectId).then(result => {
-					client.setCustPlaylistbyID(userID, result, ttl, projectId)
-					return result
+					if (result.length) {
+						debugger
+						client.setCustPlaylistbyID(userID, result, ttl, projectId)
+						return result
+					} else {
+						debugger
+						let error = {
+							status: 404,
+							code: userID,
+							detail: `resource ${userID.toLowerCase()} not found`,
+							source: {
+								'pointer': '/playlist'
+							}
+						}
+						res.status(error.status).send({ error: error })
+					}
 				})
 			}
-		}).then((result) => {
-			debugger
-			return getVidPlaylist(result, useRelationships, projectId)
+		}).then((result, err) => {
+			return new Promise(async (resolve, reject) => {
+				if (result === undefined) {
+					debugger
+					reject(err)
+				} else {
+					let datas = await getVidPlaylist(result, useRelationships, projectId)
+					resolve(datas)
+				}
+			})
 		}).then((data) => {
 			// let newdata = {}
 			console.log(data.data)
@@ -227,6 +246,7 @@ HandlerPlaylist.postNewPlaylist = async (req, res, next) => {
 		let resultInsert = await query.insertCustPlaylist(data, projectId)
 		if (resultInsert instanceof Error) throw resultInsert
 		debugger
+		client.delCustPlaylist(data.userId, projectId)
 		res.json(resultInsert)
 	} catch (error) {
 		debugger

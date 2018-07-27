@@ -325,6 +325,7 @@ Util.createVideo = async (res) => {
 		attributes: {}
 	}
 	delete res.id
+	delete res.deletedAt
 	for (const key in res) {
 		const newKey = await _.camelCase(key)
 		result.attributes[newKey] = res[key]

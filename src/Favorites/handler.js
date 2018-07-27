@@ -1,28 +1,24 @@
 const _ = require('lodash')
-const util = require('../util.js')
+const Util = require('../util.js')
 
 const query = require('../query.js')
 const config = require('config')
 const Redis = require('../redis.js')
 const client = new Redis(config.redis.port, config.redis.host)
-// const ttl = config.redis.ttl
+const ttl = config.redis.ttl
 const HandleFavorites = {}
 
-let getFavoritesData = (fv, useRelationships, projectId) => {
-	let data = util.newJSONAPIObject()
-
+let getFavoritesData = (hs, useRelationships, projectId) => {
+	let data = Util.newJSONAPIObject()
 	return new Promise((resolve, reject) => {
 		new Promise((resolve, reject) => {
-			resolve(fv)
+			resolve(hs)
 		}).then((result) => {
-			debugger
-			console.log(fv)
-			return result.map((fv) => {
+			return result.map((hs) => {
+				debugger
 				return new Promise((resolve, reject) => {
-					util.createFavorites(fv).then((res) => {
+					Util.createFavorites(hs, useRelationships, projectId).then((res) => {
 						data.data.push(res)
-						debugger
-						console.log(res)
 						resolve()
 					})
 				})
@@ -38,38 +34,48 @@ let getFavoritesData = (fv, useRelationships, projectId) => {
 				if (!useRelationships) {
 					return Promise.resolve([])
 				}
+
 				let videoIds = []
 
 				debugger
+
 				for (let data_ of data.data) {
-					const x = new Promise((resolve, reject) => {
+					// data_.videos.data.push({ "test": "test", "video_id": data_.videoId })
+					const x = new Promise(async (resolve, reject) => {
 						debugger
-						client.getVideoById(data_.attributes.videoId, projectId).then((result) => {
-							if (result != null) {
-								return new Promise((resolve, reject) => {
-									util.createVideo(result).then((res) => {
-										console.log('cek redis')
-										debugger
-										data_.attributes.videos.push(res)
-										resolve()
-									})
-								})
+						await client.getVideoById(data_.attributes.videoId, projectId).then((res) => {
+							if (res != null) {
+								console.log('cek redis')
+								debugger
+
+								let arrVd = {
+									id: res.id,
+									type: 'video',
+									attributes: {}
+								}
+								delete res.id
+								delete res.deletedAt
+								for (const key in res) {
+									const newKey = _.camelCase(key)
+									arrVd.attributes[newKey] = res[key]
+								}
+								data_.attributes.videos.push(arrVd)
 							} else {
 								query.getVideo(data_.attributes.videoId, projectId).then((result) => {
 									if (result.length) {
 										// data.videos.data.push(result[0]);
 										// data_.attributes.videos.push(result[0])
 										// console.log(result)
-										let allData = result[0].dataValues
+										let allData = result[0]
 										debugger
 										console.log(allData)
 										return new Promise(async (resolve, reject) => {
-											util.createVideo(allData).then((res) => {
+											Util.createVideo(allData).then((res) => {
 												data_.attributes.videos.push(res)
 												resolve()
 											})
 
-											// client.setVideoById(data_.attributes.videoId, result[0], ttl, projectId)
+											client.setVideoById(data_.attributes.videoId, result[0], ttl, projectId)
 										})
 									} else {
 										data_.attributes.videos.push({ 'videos': 'not_found' })
@@ -83,7 +89,7 @@ let getFavoritesData = (fv, useRelationships, projectId) => {
 					x.then(console.log(x))
 				}
 
-				for (let it of fv) {
+				for (let it of hs) {
 					debugger
 					videoIds.push(it.video_id)
 				}
@@ -118,7 +124,6 @@ let getFavoritesData = (fv, useRelationships, projectId) => {
 				console.log('cek delete')
 				for (let item of data.data) {
 					delete item.attributes.videoId
-					delete item.attributes.id
 				}
 
 				return Promise.resolve(data)
@@ -192,42 +197,43 @@ HandleFavorites.getFavoritesByID = (req, res, next) => {
 	let favorit = []
 	// get Preference from redis
 	client.getUserVidFavorites(projectId, userID).then((result) => {
-		return new Promise((resolve, reject) => {
-			if (result != null) {
-				if (result !== 'undefined') {
-					console.log('cek redis')
-					favorit.push(result)
-				}
-				resolve(result)
-				debugger
-				console.log(favorit)
-			} else {
-				query.getFavoritesByIDs(userID, projectId).then((result) => {
-					if (result.length) {
-						// add to redis
-						// client.setUserVidFavorites(userID, result, ttl, projectId)
-						debugger
-						resolve(result)
-					} else {
-						let error = {
-							status: 404,
-							code: userID,
-							detail: `resource ${userID.toLowerCase()} not found`,
-							source: {
-								'pointer': '/favorites'
-							}
-						}
-
-						reject(error)
-					}
+		if (result != null) {
+			debugger
+			return result
+		} else {
+			return query.getFavoritesByIDs(userID, projectId).then((result) => {
+				if (result.length) {
+					// add to redis
+					client.setUserVidFavorites(userID, result, ttl, projectId)
 					debugger
-					console.log(result)
-				})
+					return result
+				} else {
+					let error = {
+						status: 404,
+						code: userID,
+						detail: `resource ${userID.toLowerCase()} not found`,
+						source: {
+							'pointer': '/favorites'
+						}
+					}
+					next(error)
+					// res.status(error.status).send({ error: error })
+				}
+				debugger
+				console.log(result)
+			})
+		}
+	}).then((result, err) => {
+		return new Promise(async (resolve, reject) => {
+			if (result === undefined) {
+				debugger
+				reject(err)
+			} else {
+				let datas = await getFavoritesData(result, useRelationships, projectId)
+				resolve(datas)
 			}
 		})
-	}).then((result) => {
-		debugger
-		return getFavoritesData(result, useRelationships, projectId)
+
 	}).then((data) => {
 		res.setHeader('content-type', 'application/vnd.api+json')
 		res.json(data)
