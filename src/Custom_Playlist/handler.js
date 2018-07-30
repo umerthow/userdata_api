@@ -17,6 +17,7 @@ let getVidPlaylist = (hs, useRelationships, projectId) => {
 
 	return new Promise((resolve, reject) => {
 		new Promise((resolve, reject) => {
+			console.log(hs)
 			resolve(hs)
 		}).then((result) => {
 			return result.map((hs) => {
@@ -204,6 +205,15 @@ HandlerPlaylist.readCustPlaylist = async (req, res, next) => {
 			// let newdata = {}
 			console.log(data.data)
 			var sortData = data.data.sort(HandlerPlaylist.custumSort)
+
+			var grades = {}
+			sortData.forEach(function (item) {
+				var grade = grades[item.id] = grades[item.id] || {}
+				grade[item.key] = grade[item.type]
+			})
+
+			console.log(JSON.stringify(grades, null, 4))
+
 			res.setHeader('content-type', 'application/vnd.api+json')
 			res.json({ data: sortData })
 		}).catch(function (err) {
